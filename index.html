@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="es" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Elessär — Metal sinfónico desde la Patagonia</title>
+<meta name="description" content="Sitio oficial de Elessär, banda de metal sinfónico de Neuquén, Argentina. Música, fechas, tienda oficial y prensa.">
+<meta name="theme-color" content="#07080b">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Elessär — Metal sinfónico desde la Patagonia">
+<meta property="og:description" content="Sitio oficial de Elessär, banda de metal sinfónico de Neuquén, Argentina. Música, fechas, tienda oficial y prensa.">
+<meta property="og:image" content="assets/img/og-image.jpg">
+<link rel="icon" type="image/png" href="assets/img/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Inter+Tight:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="css/styles.css?v=20261020">
+<link rel="preload" as="image" href="assets/img/live-stage-blue.webp">
+</head>
+<body class="page-home">
+<a class="sr-only" href="#main">Saltar al contenido</a>
+<div id="announce" class="announce" role="region" aria-label="Aviso" hidden></div>
+<header class="header">
+  <div class="wrap header__inner">
+    <a class="header__logo" href="index.html" aria-label="Elessär — inicio"><img src="assets/img/logo.webp" alt="Elessär" width="800" height="540"></a>
+    <nav class="nav" aria-label="Principal"><a href="index.html" aria-current="page">Inicio</a><a href="banda.html">Banda</a><a href="musica.html">Música</a><a href="fechas.html">Fechas</a><a href="tienda.html">Tienda</a><a href="contacto.html">Contacto</a></nav>
+    <div class="header__actions">
+      <button class="icon-btn" type="button" data-open-cart aria-label="Abrir carrito">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14l-1.2 12.2a1 1 0 0 1-1 .8H7.2a1 1 0 0 1-1-.8z"/><path d="M9 7V5.5a3 3 0 0 1 6 0V7"/></svg>
+        <span class="cart-count" aria-live="polite">0</span>
+      </button>
+      <button class="icon-btn burger" type="button" aria-label="Menú" aria-expanded="false" aria-controls="mobile-menu"><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+<div class="mobile-menu" id="mobile-menu">
+  <nav aria-label="Menú móvil"><a href="index.html" aria-current="page">Inicio</a><a href="banda.html">Banda</a><a href="musica.html">Música</a><a href="fechas.html">Fechas</a><a href="tienda.html">Tienda</a><a href="contacto.html">Contacto</a></nav>
+  <div class="socials" data-socials><a href="https://open.spotify.com/artist/3Q89babzF4j6t0kP7gfUL6" target="_blank" rel="noopener" aria-label="Spotify"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0a12 12 0 1 0 0 24 12 12 0 0 0 0-24zm5.5 17.3a.75.75 0 0 1-1 .25c-2.8-1.7-6.4-2.1-10.6-1.2a.75.75 0 1 1-.33-1.46c4.6-1 8.6-.6 11.7 1.4.35.2.46.67.24 1zm1.5-3.3a.94.94 0 0 1-1.3.3c-3.2-2-8.1-2.6-11.9-1.4a.94.94 0 1 1-.55-1.8c4.3-1.3 9.7-.7 13.4 1.6.44.27.58.85.3 1.3zm.13-3.4C15.3 8.3 8.9 8.1 5.2 9.2a1.1 1.1 0 1 1-.65-2.15c4.3-1.3 11.3-1 15.7 1.6a1.1 1.1 0 0 1-1.13 1.95z"/></svg></a><a href="https://www.youtube.com/channel/UCDrV_jh5gi7aL-ciIQqId9w" target="_blank" rel="noopener" aria-label="YouTube"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.6 15.6V8.4l6.3 3.6-6.3 3.6z"/></svg></a><a href="https://elessarband.bandcamp.com/" target="_blank" rel="noopener" aria-label="Bandcamp"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M0 18.75l7.44-13.5H24l-7.44 13.5z"/></svg></a></div>
+</div>
+<div class="splash" aria-hidden="true"><img src="assets/img/logo.webp" alt=""></div>
+<main id="main">
+  <!-- HERO: imagen + video (se reemplazan desde el panel: Contenido → Hero) -->
+  <section class="hero" id="hero">
+    <div class="hero__media">
+      <img src="assets/img/live-stage-blue.webp" alt="" fetchpriority="high" data-hero-image>
+      <video muted loop playsinline preload="none" data-hero-video aria-hidden="true"></video>
+    </div>
+    <div class="hero__light" aria-hidden="true"></div>
+    <div class="hero__content">
+      <h1 class="sr-only">Elessär</h1>
+      <img class="hero__logo" src="assets/img/logo.webp" alt="Elessär" width="800" height="540">
+      <p class="hero__tag" data-hero-tagline>Metal sinfónico · Patagonia</p>
+      <p class="hero__title" data-hero-title>Desde Neuquén, al borde del Kósmos.</p>
+      <div class="hero__ctas">
+        <a class="btn btn--gold" href="musica.html" data-hero-cta1>Escuchar</a>
+        <a class="btn btn--ghost" href="tienda.html" data-hero-cta2>Tienda oficial</a>
+      </div>
+    </div>
+    <a class="hero__scroll" href="#lanzamiento">Descender</a>
+  </section>
+
+  <!-- LANZAMIENTO DESTACADO -->
+  <section class="section" id="lanzamiento">
+    <div class="wrap feature-release" id="featured-release">
+      <div class="cover cover--vinyl reveal"><img src="assets/img/cover-por-una-cabeza.webp" alt="Portada de Por una cabeza" loading="lazy"></div>
+      <div class="reveal reveal-d1">
+        <span class="kicker">Nuevo lanzamiento</span>
+        <h2 class="display" style="margin-top:.8rem">Por una <em>cabeza</em></h2>
+        <div class="release-meta"><span class="chip chip--gold">Single</span><span class="chip">C. Gardel · versión Elessär</span></div>
+        <p class="lead">El tango de Gardel y Le Pera, reimaginado con orquesta, guitarras y la voz de Elessär.</p>
+        <div class="platforms"><a class="btn btn--gold" href="musica.html">Escuchar ahora</a></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="marquee" aria-hidden="true"><div class="marquee__track">
+    <span>Ultimate Escape</span><span>Impetus</span><span>Introducing the Majestic</span><span>Afraid</span><span>Eternity</span><span>Kósmos</span><span>Inside</span><span>The Way</span><span>Be Still</span><span>Por una cabeza</span>
+    <span>Ultimate Escape</span><span>Impetus</span><span>Introducing the Majestic</span><span>Afraid</span><span>Eternity</span><span>Kósmos</span><span>Inside</span><span>The Way</span><span>Be Still</span><span>Por una cabeza</span>
+  </div></div>
+
+  <!-- REPRODUCTORES -->
+  <section class="section section--alt">
+    <div class="wrap">
+      <div class="section__head section__head--row">
+        <div><span class="kicker kicker--teal">Escuchá y mirá</span><h2 class="h2" style="margin-top:.8rem">El sonido de Elessär</h2></div>
+        <a class="link-arrow" href="musica.html">Discografía completa →</a>
+      </div>
+      <div class="split split--wide-media">
+        <div class="embed embed--16x9 reveal">
+          <div class="yt-facade" data-yt role="button" tabindex="0" aria-label="Reproducir videos de Elessär">
+            <img src="assets/img/live-vocal-logo.webp" alt="" loading="lazy">
+            <span class="yt-facade__play"><svg viewBox="0 0 24 24"><path d="M6 4l14 8-14 8z"/></svg></span>
+            <span class="yt-facade__label">Videos oficiales · YouTube</span>
+          </div>
+        </div>
+        <div class="reveal reveal-d1" id="spotify-embed">
+          <iframe title="Elessär en Spotify" src="https://open.spotify.com/embed/artist/3Q89babzF4j6t0kP7gfUL6?utm_source=generator&theme=0" width="100%" height="352" style="border:0;border-radius:12px" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRÓXIMOS SHOWS -->
+  <section class="section">
+    <div class="wrap">
+      <div class="section__head section__head--row">
+        <div><span class="kicker">En vivo</span><h2 class="h2" style="margin-top:.8rem">Próximas fechas</h2></div>
+        <a class="link-arrow" href="fechas.html">Todas las fechas →</a>
+      </div>
+      <ul class="shows" id="home-shows"><li class="shows-empty"><p>Cargando fechas…</p></li></ul>
+    </div>
+  </section>
+
+  <!-- MERCH DESTACADO -->
+  <section class="section section--alt">
+    <div class="wrap">
+      <div class="section__head section__head--row">
+        <div><span class="kicker">Tienda oficial</span><h2 class="h2" style="margin-top:.8rem">Merch</h2></div>
+        <a class="link-arrow" href="tienda.html">Ver toda la tienda →</a>
+      </div>
+      <div class="products" id="home-products"></div>
+    </div>
+  </section>
+
+  <!-- LA BANDA -->
+  <section class="section">
+    <div class="wrap split">
+      <div class="frame frame--arch reveal" style="aspect-ratio:4/5"><img src="assets/img/band-crowd.webp" alt="Elessär junto al público" loading="lazy"></div>
+      <div class="reveal reveal-d1">
+        <span class="kicker">La banda</span>
+        <h2 class="display" style="margin:.8rem 0 1.4rem">Desde <em>2007</em></h2>
+        <div class="prose" id="home-bio"><p>Elessär nace en julio de 2007 en Neuquén, en la Patagonia argentina. Metal sinfónico de composición propia, con arreglos orquestales y melodías que miran a la gran tradición europea del género sin dejar de sonar a este lado del mundo.</p></div>
+        <a class="link-arrow" href="banda.html">Conocé la historia →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- GALERÍA HORIZONTAL -->
+  <section class="section--tight" aria-label="Fotos">
+    <div class="strip wrap" id="home-strip">
+      <img src="assets/img/live-stage-blue.webp" alt="Elessär en vivo" loading="lazy">
+      <img src="assets/img/live-bw-duo.webp" alt="Elessär en vivo" loading="lazy">
+      <img src="assets/img/live-red-smoke.webp" alt="Elessär en vivo" loading="lazy">
+      <img src="assets/img/live-drums.webp" alt="Elessär en vivo" loading="lazy">
+      <img src="assets/img/live-vocal-blue.webp" alt="Elessär en vivo" loading="lazy">
+    </div>
+  </section>
+</main>
+<footer class="footer">
+  <div class="wrap">
+    <img class="footer__logo" src="assets/img/logo.webp" alt="Elessär" width="800" height="540" loading="lazy">
+    <p class="footer__tag">Metal sinfónico desde <span data-setting="contact.location">Neuquén, Patagonia, Argentina</span></p>
+    <div class="socials" data-socials><a href="https://open.spotify.com/artist/3Q89babzF4j6t0kP7gfUL6" target="_blank" rel="noopener" aria-label="Spotify"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0a12 12 0 1 0 0 24 12 12 0 0 0 0-24zm5.5 17.3a.75.75 0 0 1-1 .25c-2.8-1.7-6.4-2.1-10.6-1.2a.75.75 0 1 1-.33-1.46c4.6-1 8.6-.6 11.7 1.4.35.2.46.67.24 1zm1.5-3.3a.94.94 0 0 1-1.3.3c-3.2-2-8.1-2.6-11.9-1.4a.94.94 0 1 1-.55-1.8c4.3-1.3 9.7-.7 13.4 1.6.44.27.58.85.3 1.3zm.13-3.4C15.3 8.3 8.9 8.1 5.2 9.2a1.1 1.1 0 1 1-.65-2.15c4.3-1.3 11.3-1 15.7 1.6a1.1 1.1 0 0 1-1.13 1.95z"/></svg></a><a href="https://www.youtube.com/channel/UCDrV_jh5gi7aL-ciIQqId9w" target="_blank" rel="noopener" aria-label="YouTube"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.6 15.6V8.4l6.3 3.6-6.3 3.6z"/></svg></a><a href="https://elessarband.bandcamp.com/" target="_blank" rel="noopener" aria-label="Bandcamp"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M0 18.75l7.44-13.5H24l-7.44 13.5z"/></svg></a></div>
+    <nav class="footer__nav" aria-label="Pie de página"><a href="index.html">Inicio</a><a href="banda.html">Banda</a><a href="musica.html">Música</a><a href="fechas.html">Fechas</a><a href="tienda.html">Tienda</a><a href="contacto.html">Contacto</a><a href="contacto.html#prensa">Prensa / EPK</a></nav>
+    <div class="footer__bottom">
+      <span>© <span id="year">2026</span> Elessär. Todos los derechos reservados.</span>
+      <span id="demo-badge" class="demo-badge" hidden>Modo demo · contenido de ejemplo</span>
+    </div>
+  </div>
+</footer>
+
+<!-- Carrito lateral -->
+<div class="drawer-backdrop" id="cart-backdrop"></div>
+<aside class="drawer" id="cart-drawer" aria-label="Carrito" aria-hidden="true">
+  <div class="drawer__head">
+    <span class="h3">Carrito</span>
+    <button class="icon-btn drawer__close" type="button" aria-label="Cerrar carrito"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  </div>
+  <div class="drawer__body"></div>
+  <div class="drawer__foot" hidden>
+    <div class="total-row"><span class="label">Subtotal</span><strong class="js-subtotal">$0</strong></div>
+    <p class="small muted" style="margin:0">El envío se calcula en el siguiente paso.</p>
+    <a class="btn btn--gold btn--block" href="checkout.html">Finalizar compra</a>
+    <button class="btn btn--ghost btn--block drawer__close" type="button">Seguir comprando</button>
+  </div>
+</aside>
+<div class="grain" aria-hidden="true"></div>
+<script defer src="js/config.js?v=20261020"></script>
+<script defer src="js/default-data.js?v=20261020"></script>
+<script defer src="js/api.js?v=20261020"></script>
+<script defer src="js/store.js?v=20261020"></script>
+<script defer src="js/ui.js?v=20261020"></script>
+<script defer src="js/pages/home.js?v=20261020"></script>
+</body>
+</html>

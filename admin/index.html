@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Panel · Elessär</title>
+<link rel="icon" type="image/png" href="../assets/img/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500&family=Inter+Tight:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="admin.css?v=20261020">
+</head>
+<body>
+
+<!-- ============ LOGIN ============ -->
+<div class="login" id="login" hidden>
+  <div class="login__card">
+    <img class="login__logo" src="../assets/img/logo.webp" alt="Elessär">
+    <p class="login__title">Panel de administración</p>
+
+    <div id="setup-notice" hidden>
+      <p class="help">El panel todavía no está conectado a una base de datos. Seguí la guía <b>docs/DEPLOY.md</b> (≈15 minutos) y completá <code>js/config.js</code>.</p>
+      <a class="btn btn--primary btn--block" href="?demo=1">Ver el panel en modo demostración</a>
+      <p class="small muted" style="text-align:center;margin-top:14px"><a href="../index.html">← Volver al sitio</a></p>
+    </div>
+
+    <form id="login-form" novalidate>
+      <div class="field"><label for="email">Email</label><input class="input" id="email" name="email" type="email" autocomplete="username" required></div>
+      <div class="field"><label for="password">Contraseña</label><input class="input" id="password" name="password" type="password" autocomplete="current-password" required></div>
+      <button class="btn btn--primary btn--block" type="submit">Ingresar</button>
+      <p class="err" id="login-err" role="alert"></p>
+      <button class="link" type="button" id="forgot">¿Olvidaste tu contraseña?</button>
+    </form>
+  </div>
+</div>
+
+<!-- ============ APP ============ -->
+<div class="app" id="app" hidden>
+  <aside class="side">
+    <div class="side__top">
+      <a href="#/dashboard"><img class="side__logo" src="../assets/img/logo.webp" alt="Elessär"></a>
+      <div class="btn-row mobile-only"><a class="btn btn--sm btn--ghost" href="../index.html" target="_blank">Sitio ↗</a><button class="btn btn--sm btn--ghost" data-logout>Salir</button></div>
+    </div>
+    <nav id="nav" aria-label="Secciones del panel"></nav>
+    <div class="side__foot">
+      <span id="user-email"></span>
+      <div class="btn-row"><a class="btn btn--sm btn--ghost" href="../index.html" target="_blank">Ver sitio ↗</a><button class="btn btn--sm btn--ghost" data-logout>Salir</button></div>
+    </div>
+  </aside>
+  <main class="main" id="main"></main>
+</div>
+
+<script defer src="../js/config.js?v=20261020"></script>
+<script defer src="../js/default-data.js?v=20261020"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script defer src="admin.js?v=20261020"></script>
+</body>
+</html>

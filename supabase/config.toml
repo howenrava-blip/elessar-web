@@ -1,0 +1,11 @@
+# Configuración mínima para la CLI de Supabase (opcional).
+# Si desplegás desde el panel web de Supabase no hace falta.
+project_id = "elessar"
+
+# Ambas funciones validan todo internamente y reciben llamadas sin sesión
+# (el checkout público y los avisos de MercadoPago/Stripe).
+[functions.create-checkout]
+verify_jwt = false
+
+[functions.payment-webhook]
+verify_jwt = false
