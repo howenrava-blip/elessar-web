@@ -17,11 +17,11 @@
   "use strict";
 
   window.ELESSAR_CONFIG = {
-    SUPABASE_URL: "",       // ej: "https://abcdxyz.supabase.co"
-    SUPABASE_ANON_KEY: "",  // ej: "eyJhbGciOiJIUzI1NiIsInR5cCI6..."
+    SUPABASE_URL: "https://ymcgflbffxbeoqdxktjj.supabase.co",
+    SUPABASE_ANON_KEY: "sb_publishable_GE2PlPiG6dCwZ8Kg5hM6aQ_mBKJBnkb", // clave pública (publishable)
 
     // Librería de Supabase (se carga solo si hay URL configurada)
-    SUPABASE_JS_CDN: "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js",
+    SUPABASE_JS_CDN: "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.50.0/dist/umd/supabase.js",
 
     // Tienda
     CURRENCY: "ARS",
