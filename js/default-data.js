@@ -63,9 +63,37 @@
         press_email: "",
         location: "Neuquén, Patagonia, Argentina"
       },
+      /* Recuadro "Kit de prensa" de contacto.html (editable en Panel → Prensa) */
       press: {
-        epk_url: "assets/epk/elessar-epk.pdf",
-        photos_zip_url: ""
+        title: "Kit de prensa",
+        text: "Biografía, discografía, fotos y logos en alta para medios, productores y festivales.",
+        downloads: [
+          { label: "EPK completo (PDF)", url: "assets/epk/elessar-epk.pdf" },
+          { label: "Logo · PNG transparente", url: "assets/img/logo.png" },
+          { label: "Foto promocional", url: "assets/img/band-promo.webp" },
+          { label: "Foto en vivo", url: "assets/img/live-vocal-logo.webp" }
+        ]
+      },
+      /* Métodos de pago (editable en Panel → Pagos).
+         Las claves secretas NO van acá: viven en los secretos de Supabase. */
+      payments: {
+        mercadopago_enabled: true,
+        mercadopago_label: "MercadoPago",
+        mercadopago_description: "Tarjetas de crédito y débito, dinero en cuenta, efectivo.",
+        paypal_enabled: false,
+        paypal_label: "PayPal",
+        paypal_description: "Pagos desde el exterior. Se cobra en dólares (USD).",
+        paypal_usd_rate: null,                 // cuántos ARS vale 1 USD
+        stripe_enabled: false,
+        stripe_label: "Tarjeta internacional (Stripe)",
+        stripe_description: "Visa, Mastercard, Amex — pagos desde el exterior.",
+        whatsapp_enabled: false,
+        whatsapp_number: "",                   // ej: 5492991234567
+        whatsapp_label: "Coordinar por WhatsApp",
+        whatsapp_description: "Te abrimos WhatsApp con tu pedido y coordinamos pago y entrega.",
+        whatsapp_intro: "Hola Elessär, estoy en la página y quiero comprar los siguientes productos:",
+        whatsapp_include_total: true,
+        whatsapp_cart_button: true             // botón "Pedir por WhatsApp" en el carrito
       },
       shop: {
         shipping_options: [

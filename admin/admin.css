@@ -167,3 +167,11 @@ td .thumb { width: 46px; height: 46px; object-fit: cover; border-radius: 6px; bo
 .spinner { width: 22px; height: 22px; border: 2px solid var(--line-2); border-top-color: var(--gold); border-radius: 50%; animation: spin .8s linear infinite; margin: 40px auto; }
 @keyframes spin { to { transform: rotate(360deg); } }
 .help { background: var(--panel-2); border-left: 2px solid var(--teal); padding: 10px 14px; border-radius: 0 8px 8px 0; color: var(--soft); font-size: .85rem; margin-bottom: 16px; }
+
+/* Editor de descargas (Prensa) */
+.row-edit--dl { grid-template-columns: 54px 1fr; }
+.row-edit--dl > .btn-row { grid-column: 1 / -1; justify-content: flex-end; }
+@media (min-width: 760px) {
+  .row-edit--dl { grid-template-columns: 54px 1fr 1.6fr auto; }
+  .row-edit--dl > .btn-row { grid-column: auto; }
+}

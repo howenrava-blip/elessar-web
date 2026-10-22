@@ -71,6 +71,7 @@
         state.items.push({
           productId: item.productId, variantId: item.variantId, slug: item.slug,
           name: item.name, variantLabel: item.variantLabel || "",
+          size: item.size || null, color: item.color || null, category: item.category || null,
           price: Number(item.price) || 0, image: item.image || "",
           maxStock: item.maxStock, qty: clampQty(qty, item.maxStock)
         });

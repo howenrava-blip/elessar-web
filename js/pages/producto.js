@@ -46,7 +46,7 @@
           '<button class="btn btn--gold" type="button" id="add-btn">Agregar al carrito</button>' +
         "</div>" +
         '<div class="pdp__desc prose prose--plain">' + String(p.description || "").split(/\n+/).map(function (t) { return "<p>" + esc(t) + "</p>"; }).join("") + "</div>" +
-        '<ul class="pdp__perks"><li>Envíos a todo el país</li><li>Retiro sin cargo en Neuquén capital</li><li>Pago seguro con MercadoPago</li></ul>' +
+        '<ul class="pdp__perks"><li>Envíos a todo el país</li><li>Retiro sin cargo en Neuquén capital</li><li>Pago seguro</li></ul>' +
       "</div>";
 
     function current() {
@@ -109,6 +109,7 @@
       var label = [v.color && colors.length > 1 ? v.color : null, v.size].filter(Boolean).join(" · ");
       Cart.add({
         productId: p.id, variantId: v.id, slug: p.slug, name: p.name, variantLabel: label,
+        size: v.size, color: colors.length > 1 ? v.color : null, category: p.category,
         price: v.price_override || p.price, image: p.images[0], maxStock: v.stock
       }, sel.qty);
       sel.qty = 1; update();

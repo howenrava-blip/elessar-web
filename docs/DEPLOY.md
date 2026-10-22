@@ -109,9 +109,44 @@ La función ya le indica a MercadoPago a dónde avisar en cada compra (`notifica
 
 ---
 
-## 5. (Opcional) Stripe para pagos internacionales
+## 5. Elegir los métodos de pago desde el panel
 
-1. `js/config.js` → `PAYMENT_PROVIDERS: ["mercadopago", "stripe"]`
+En **/admin → Pagos** activás o desactivás cada método con un interruptor, y le cambiás el nombre y la descripción que ve el cliente:
+
+| Método | Qué necesita además |
+|---|---|
+| **MercadoPago** | Secretos `MP_ACCESS_TOKEN` y `SITE_URL` (punto 4). |
+| **PayPal** | Secretos de PayPal (punto 6) + cargar la **cotización del dólar** en el panel. |
+| **Stripe** | Secretos de Stripe (punto 7). |
+| **WhatsApp** | Solo el número en el panel. No cobra online: te llega el pedido por WhatsApp. |
+
+Si dejás activo **solo WhatsApp**, todas las compras se coordinan por chat y el carrito muestra directamente el botón «Pedir por WhatsApp».
+
+> Cada vez que se actualiza `supabase/functions/create-checkout/index.ts`, hay que volver a pegarlo en Supabase → Edge Functions → create-checkout → **Deploy**.
+
+---
+
+## 6. (Opcional) PayPal
+
+1. Entrá a <https://developer.paypal.com> con la cuenta PayPal **Business** donde querés cobrar → **Apps & Credentials** → pestaña **Live** → **Create App**.
+2. Copiá el **Client ID** y el **Secret**.
+3. Supabase → Edge Functions → Secrets:
+
+   | Nombre | Valor |
+   |---|---|
+   | `PAYPAL_CLIENT_ID` | el Client ID |
+   | `PAYPAL_SECRET` | el Secret |
+   | `PAYPAL_ENV` | `live` (o `sandbox` para probar con cuentas de prueba) |
+
+4. Panel → Pagos → PayPal: cargá la cotización (cuántos pesos vale 1 USD) y activalo.
+
+PayPal no opera en pesos argentinos: el total se convierte a dólares con esa cotización y el cliente ve el monto en USD antes de pagar. El cobro se confirma cuando el cliente vuelve a `gracias.html`; recién ahí el pedido pasa a *Pagado* y se descuenta stock.
+
+---
+
+## 7. (Opcional) Stripe para pagos internacionales
+
+1. Panel → Pagos → Stripe: activalo.
 2. Secretos: `STRIPE_SECRET_KEY` (sk_live_…) y `STRIPE_WEBHOOK_SECRET`.
 3. Stripe Dashboard → Developers → Webhooks → endpoint:
    `https://TU-PROYECTO.supabase.co/functions/v1/payment-webhook?provider=stripe` con el evento `checkout.session.completed`.
@@ -120,9 +155,31 @@ La función ya le indica a MercadoPago a dónde avisar en cada compra (`notifica
 
 ---
 
-## 6. (Opcional) Pedidos por WhatsApp como plan B
+## 8. Pedidos por WhatsApp
 
-En `js/config.js`: `WHATSAPP_ORDERS: "5492991234567"`. Mientras la pasarela no esté activa, el checkout arma el mensaje del pedido y abre WhatsApp.
+Panel → **Pagos → Pedido por WhatsApp**: activalo, cargá el número (formato `5492991234567`) y, si querés, cambiá el saludo. Con «Probar mensaje» ves cómo llega. El cliente envía un mensaje así:
+
+```
+Hola Elessär, estoy en la página y quiero comprar los siguientes productos:
+Remera Dark Desires Talle L
+CD Kósmos (2 ejemplares)
+
+Entrega: Envío a todo el país ($ 6.500)
+Total: $ 61.500
+
+Nombre: Ana
+Pedido N.º 3F9A1C2B
+```
+
+El pedido también queda en **Pedidos** como *Pendiente*. Cuando te paguen, cambialo a **Pagado** y el stock se descuenta solo (requiere la actualización SQL del punto 9).
+
+---
+
+## 9. Actualizaciones de la base de datos
+
+Si instalaste la base antes del 22/10/2026, corré una vez en SQL Editor:
+
+- `supabase/migrations/2026-10-22-pagos-y-whatsapp.sql` (permite descontar stock al marcar como pagado un pedido de WhatsApp).
 
 ---
 
@@ -134,5 +191,8 @@ En `js/config.js`: `WHATSAPP_ORDERS: "5492991234567"`. Mientras la pasarela no e
 | El panel dice "no tiene permisos" | Falta el paso 2 de `docs/ADMIN.md` (insertar en `admins`). |
 | "No se pudo subir" una imagen | No corriste `schema.sql` completo (crea el bucket `media`) o el usuario no es admin. |
 | El checkout dice "MercadoPago no está configurado" | Falta el secreto `MP_ACCESS_TOKEN`. |
+| WhatsApp abre MercadoPago o no registra el pedido | La función `create-checkout` publicada es la versión vieja: volvé a pegar el código actual y Deploy. |
+| PayPal dice "falta la cotización" | Panel → Pagos → PayPal → cargá cuántos pesos vale 1 USD. |
+| Al marcar un pedido de WhatsApp como Pagado no baja el stock | Falta correr la migración del punto 9. |
 | El pago se aprueba pero el pedido queda Pendiente | `payment-webhook` con "Verify JWT" activado, o `MP_ACCESS_TOKEN` de prueba vs. producción mezclados. Ver Logs. |
 | Cambié CSS y no se ve | Subí el número `?v=` en los `.html` (ver punto 2). |

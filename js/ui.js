@@ -58,10 +58,73 @@
     instagram: '<path d="M12 2.2c3.2 0 3.6 0 4.8.1 1.2.1 1.8.2 2.2.4.6.2 1 .5 1.4.9.4.4.7.8.9 1.4.2.4.4 1 .4 2.2.1 1.3.1 1.6.1 4.8s0 3.6-.1 4.8c-.1 1.2-.2 1.8-.4 2.2-.2.6-.5 1-.9 1.4-.4.4-.8.7-1.4.9-.4.2-1 .4-2.2.4-1.3.1-1.6.1-4.8.1s-3.6 0-4.8-.1c-1.2-.1-1.8-.2-2.2-.4-.6-.2-1-.5-1.4-.9-.4-.4-.7-.8-.9-1.4-.2-.4-.4-1-.4-2.2C2.2 15.6 2.2 15.2 2.2 12s0-3.6.1-4.8c.1-1.2.2-1.8.4-2.2.2-.6.5-1 .9-1.4.4-.4.8-.7 1.4-.9.4-.2 1-.4 2.2-.4C8.4 2.2 8.8 2.2 12 2.2zM12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm0 8.2a3.2 3.2 0 1 1 0-6.4 3.2 3.2 0 0 1 0 6.4zm5.2-9.6a1.2 1.2 0 1 0 0 2.4 1.2 1.2 0 0 0 0-2.4z"/>',
     facebook: '<path d="M24 12a12 12 0 1 0-13.9 11.9v-8.4h-3V12h3V9.4c0-3 1.8-4.7 4.5-4.7 1.3 0 2.7.2 2.7.2v3h-1.5c-1.5 0-2 .9-2 1.9V12h3.4l-.5 3.5h-2.9v8.4A12 12 0 0 0 24 12z"/>',
     tiktok: '<path d="M16.6 0h-4v16.3a3.4 3.4 0 1 1-2.4-3.3V8.9a7.5 7.5 0 1 0 6.4 7.4V8.1a9.3 9.3 0 0 0 5.4 1.7V5.8A5.4 5.4 0 0 1 16.6 0z"/>',
-    play: '<path d="M6 4l14 8-14 8z"/>'
+    play: '<path d="M6 4l14 8-14 8z"/>',
+    whatsapp: '<path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.3 14.2c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.5-3.9-4.7-4.1-.1-.2-1.1-1.5-1.1-2.8s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.3.5-.4.4c-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.3.2.5.1.6-.1l.9-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.1.1.6-.1 1.2z"/>'
   };
   function icon(name) { return '<svg viewBox="0 0 24 24" aria-hidden="true">' + (ICONS[name] || "") + "</svg>"; }
   var SOCIAL_LABELS = { spotify: "Spotify", youtube: "YouTube", bandcamp: "Bandcamp", instagram: "Instagram", facebook: "Facebook", tiktok: "TikTok" };
+
+  /* ---------- métodos de pago (Panel → Pagos) ---------- */
+  var PAY_DEFAULTS = {
+    mercadopago: { label: "MercadoPago", description: "Tarjetas de crédito y débito, dinero en cuenta, efectivo." },
+    paypal: { label: "PayPal", description: "Pagos desde el exterior. Se cobra en dólares (USD)." },
+    stripe: { label: "Tarjeta internacional (Stripe)", description: "Visa, Mastercard, Amex — pagos desde el exterior." },
+    whatsapp: { label: "Coordinar por WhatsApp", description: "Te abrimos WhatsApp con tu pedido y coordinamos pago y entrega." }
+  };
+  /** Devuelve [{id, label, description}] con los métodos activos, en orden */
+  function paymentMethods(s) {
+    var p = (s && s.payments) || {};
+    var configured = Object.keys(p).some(function (k) { return /_enabled$/.test(k); });
+    var ids = Object.keys(PAY_DEFAULTS);
+    var active = configured
+      ? ids.filter(function (id) { return p[id + "_enabled"] === true; })
+      : (CFG.PAYMENT_PROVIDERS || ["mercadopago"]).concat(CFG.WHATSAPP_ORDERS ? ["whatsapp"] : []);
+    if (active.indexOf("whatsapp") > -1 && !waNumber(s)) active = active.filter(function (id) { return id !== "whatsapp"; });
+    return active.filter(function (id) { return PAY_DEFAULTS[id]; }).map(function (id) {
+      return { id: id, label: p[id + "_label"] || PAY_DEFAULTS[id].label, description: p[id + "_description"] || PAY_DEFAULTS[id].description };
+    });
+  }
+
+  /* ---------- pedido por WhatsApp ---------- */
+  function waNumber(s) { return String(((s && s.payments) || {}).whatsapp_number || CFG.WHATSAPP_ORDERS || "").replace(/\D/g, ""); }
+
+  /** "Remera Dark Desires Talle L" · "CD Kósmos (2 ejemplares)" */
+  function waItemLine(i) {
+    var line = i.name;
+    if (i.size) line += (i.category === "remeras" ? " Talle " : " ") + i.size;
+    else if (i.size === undefined && i.variantLabel) line += " (" + i.variantLabel + ")"; // ítems guardados antes de esta versión
+    if (i.color) line += " " + i.color;
+    if (i.qty > 1) line += " (" + i.qty + (i.category === "musica" ? " ejemplares" : " unidades") + ")";
+    return line;
+  }
+
+  /** Arma el texto del pedido. extra = { shipping:{label,price}, customer:{name,…}, orderId } */
+  function waMessage(s, items, extra) {
+    var p = (s && s.payments) || {};
+    extra = extra || {};
+    var lines = [p.whatsapp_intro || "Hola Elessär, estoy en la página y quiero comprar los siguientes productos:"];
+    items.forEach(function (i) { lines.push(waItemLine(i)); });
+    var subtotal = items.reduce(function (n, i) { return n + i.price * i.qty; }, 0);
+    if (p.whatsapp_include_total !== false) {
+      lines.push("");
+      if (extra.shipping) {
+        lines.push("Entrega: " + extra.shipping.label + (extra.shipping.price ? " (" + money(extra.shipping.price) + ")" : ""));
+        lines.push("Total: " + money(subtotal + (extra.shipping.price || 0)));
+      } else {
+        lines.push("Total: " + money(subtotal) + " + envío");
+      }
+    }
+    var c = extra.customer;
+    if (c && c.name) {
+      lines.push("");
+      lines.push("Nombre: " + c.name);
+      if (c.address) lines.push("Dirección: " + [c.address, c.city, c.province, c.zip].filter(Boolean).join(", "));
+      if (c.notes) lines.push("Notas: " + c.notes);
+    }
+    if (extra.orderId) lines.push("Pedido N.º " + String(extra.orderId).slice(0, 8).toUpperCase());
+    return lines.join("\n");
+  }
+  function waUrl(s, text) { return "https://wa.me/" + waNumber(s) + "?text=" + encodeURIComponent(text); }
 
   /* ---------- toast ---------- */
   var toastEl, toastTimer;
@@ -183,6 +246,27 @@
     }
     renderCart(Cart.getState());
     Cart.subscribe(renderCart);
+
+    // Botón "Pedir por WhatsApp" en el carrito (Panel → Pagos → WhatsApp)
+    if (drawer) API.getSettings().then(function (s) {
+      var p = s.payments || {};
+      if (!p.whatsapp_enabled || p.whatsapp_cart_button === false || !waNumber(s)) return;
+      var foot = $(".drawer__foot", drawer), keep = $(".drawer__foot .drawer__close", drawer);
+      if (!foot || $("[data-wa-cart]", foot)) return;
+      var b = document.createElement("button");
+      b.type = "button"; b.className = "btn btn--ghost btn--block"; b.setAttribute("data-wa-cart", "");
+      b.innerHTML = icon("whatsapp") + "Pedir por WhatsApp";
+      foot.insertBefore(b, keep);
+      // Si WhatsApp es el único método, el botón principal también va directo al chat
+      var only = paymentMethods(s).length === 1;
+      var main = $('.drawer__foot a[href="checkout.html"]', drawer);
+      if (only && main) { main.hidden = true; b.className = "btn btn--gold btn--block"; }
+      b.addEventListener("click", function () {
+        var items = Cart.getState().items;
+        if (!items.length) return;
+        window.open(waUrl(s, waMessage(s, items)), "_blank", "noopener");
+      });
+    });
   }
 
   /* ---------- redes sociales + datos de contacto del footer ---------- */
@@ -387,7 +471,8 @@
     safe: safe, $: $, $$: $$, esc: esc, money: money, dateParts: dateParts, param: param, isSafeUrl: isSafeUrl,
     icon: icon, toast: toast, openCart: openCart, closeCart: closeCart,
     bindReveal: bindReveal, bindTilt: bindTilt, bindYouTube: bindYouTube, bindLightbox: bindLightbox, bindIcs: bindIcs,
-    productCard: productCard, showRow: showRow, totalStock: totalStock, socialLinks: socialLinks
+    productCard: productCard, showRow: showRow, totalStock: totalStock, socialLinks: socialLinks,
+    paymentMethods: paymentMethods, waNumber: waNumber, waMessage: waMessage, waUrl: waUrl
   };
 
   function boot() {

@@ -44,10 +44,12 @@ En la pantalla de ingreso escribí tu email y tocá **¿Olvidaste tu contraseña
 |---|---|
 | **Resumen** | Pedidos por preparar, ventas del mes, mensajes sin leer, próximo show y **stock bajo**. |
 | **Avisos** | La barra dorada de arriba del sitio ("¡Nuevo disco ya disponible!"). Activar/desactivar con un clic, elegir color y fechas de vigencia. |
-| **Contenido** | Imagen y textos de la portada, video de fondo, bio corta y completa, línea de tiempo, redes, IDs de Spotify/YouTube, lanzamiento destacado, emails de contacto, PDF de prensa y **opciones/costos de envío**. |
+| **Contenido** | Imagen y textos de la portada, video de fondo, bio corta y completa, línea de tiempo, redes, IDs de Spotify/YouTube, lanzamiento destacado, emails de contacto y **opciones/costos de envío**. |
+| **Pagos** | Qué métodos ve el cliente en el checkout: MercadoPago, PayPal (con cotización del dólar), Stripe y **pedido por WhatsApp** (número, saludo del mensaje, botón directo en el carrito). Arriba se ve un resumen de lo que está activo. |
+| **Prensa** | El recuadro «Kit de prensa» de Contacto: título, texto y la lista de descargas (EPK, logos, fotos, rider…). Subís archivos o pegás links, los ordenás con ↑ ↓ y los quitás con ×. |
 | **Fechas** | Cargar shows: fecha y hora, ciudad, lugar, link de entradas y estado (a la venta, agotado, entrada libre…). Los shows pasados se mueven solos a "Fechas anteriores". |
 | **Tienda** | Productos con nombre, precio, precio tachado, descripción, varias fotos (la primera es la portada) y **variantes**: talle, color y stock de cada una. Botón "Generar talles S a XXL". |
-| **Pedidos** | Ver cada compra con los datos de envío, cambiar el estado (Pagado → Enviado → Entregado) y anotar el número de seguimiento. |
+| **Pedidos** | Ver cada compra (con el método: MercadoPago, PayPal, WhatsApp…), cambiar el estado (Pagado → Enviado → Entregado) y anotar el número de seguimiento. Al pasar un pedido de WhatsApp a **Pagado**, se descuenta el stock. |
 | **Mensajes** | Lo que llega del formulario de contacto. Responder por mail, marcar leído, eliminar. |
 | **Discografía** | Discos y singles: portada, descripción, lista de temas, links e ID del reproductor de Bandcamp. |
 | **Integrantes** | Nombre, rol, foto y mini bio de cada miembro. |

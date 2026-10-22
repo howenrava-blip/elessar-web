@@ -29,10 +29,10 @@
 
     // Pasarelas habilitadas en el checkout (deben estar configuradas en la
     // Edge Function "create-checkout"; ver docs/DEPLOY.md)
-    PAYMENT_PROVIDERS: ["mercadopago"], // opciones: "mercadopago", "stripe"
+    PAYMENT_PROVIDERS: ["mercadopago"], // respaldo: los métodos se eligen en Panel → Pagos
 
     // Plan B si la pasarela no está lista: pedido por WhatsApp.
     // Número en formato internacional sin "+" ni espacios. Vacío = oculto.
-    WHATSAPP_ORDERS: ""     // ej: "5492991234567"
+    WHATSAPP_ORDERS: ""     // (obsoleto: ahora se configura en Panel → Pagos)
   };
 })();

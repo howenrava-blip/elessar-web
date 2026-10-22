@@ -15,14 +15,27 @@
     if (c.email) lines.push('<div><span class="label">General</span><br><a href="mailto:' + esc(c.email) + '">' + esc(c.email) + "</a></div>");
     if (c.location) lines.push('<div><span class="label">Base</span><br>' + esc(c.location) + "</div>");
     $("#contact-lines").innerHTML = lines.join("");
-    var epk = document.querySelector('#press-downloads a[href$=".pdf"]');
-    if (epk && p.epk_url) epk.href = p.epk_url;
-    if (p.photos_zip_url) {
-      var li = document.createElement("li");
-      li.innerHTML = '<a href="' + esc(p.photos_zip_url) + '" download>Pack de fotos en alta (ZIP) <span>↓</span></a>';
-      $("#press-downloads").appendChild(li);
-    }
+    renderPress(p);
   });
+
+  /* Recuadro "Kit de prensa": todo se edita en Panel → Prensa */
+  function renderPress(p) {
+    if (p.title) $("#press-title").textContent = p.title;
+    if (p.text != null) { $("#press-text").textContent = p.text; $("#press-text").hidden = !p.text; }
+    var list = (p.downloads || []).filter(function (d) { return d && d.url && E.isSafeUrl(d.url); });
+    // compatibilidad con la versión anterior (solo PDF + ZIP)
+    if (!p.downloads && p.epk_url) list = [{ label: "EPK completo (PDF)", url: p.epk_url }];
+    var ul = $("#press-downloads");
+    ul.innerHTML = list.map(function (d) {
+      var ext = (String(d.url).split("?")[0].match(/\.(\w{2,5})$/) || [, ""])[1].toUpperCase();
+      var file = "elessar-" + String(d.label || "archivo").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") + (ext ? "." + ext.toLowerCase() : "");
+      return '<li><a href="' + esc(d.url) + '" download="' + esc(file) + '" target="_blank" rel="noopener">' + esc(d.label || "Descargar") +
+        ' <span>' + (ext ? esc(ext) + " " : "") + "↓</span></a></li>";
+    }).join("");
+    ul.hidden = !list.length;
+    // si no queda nada para mostrar, se oculta el recuadro entero
+    $("#prensa").hidden = !list.length && !p.text;
+  }
 
   var form = $("#contact-form"), status = $("#contact-status");
   form.addEventListener("submit", function (e) {

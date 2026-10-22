@@ -183,7 +183,14 @@
      * El servidor recalcula precios y stock: el navegador nunca define montos.
      * Devuelve { url } para redirigir a MercadoPago / Stripe.
      */
-    createCheckout: function (payload) {
+    createCheckout: function (payload) { return API.invokeCheckout(payload); },
+
+    /** PayPal: confirma (captura) el pago al volver del sitio de PayPal */
+    capturePayPal: function (orderId, token) {
+      return API.invokeCheckout({ action: "paypal-capture", order_id: orderId, token: token });
+    },
+
+    invokeCheckout: function (payload) {
       return ready.then(function () {
         if (mode !== "live") {
           var e = new Error("La tienda está en modo demo: conectá Supabase y la pasarela de pago (ver docs/DEPLOY.md).");

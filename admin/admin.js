@@ -125,8 +125,10 @@
       update: function (t, id, patch, key) { return q(c.from(t).update(patch).eq(key || "id", id).select().single()); },
       remove: function (t, id) { return q(c.from(t).delete().eq("id", id)); },
       upsert: function (t, row, onConflict) { return q(c.from(t).upsert(row, { onConflict: onConflict }).select()); },
-      upload: function (file, folder) {
-        return compressImage(file).then(function (f) {
+      rpc: function (fn, args) { return q(c.rpc(fn, args)); },
+      upload: function (file, folder) { return this.uploadRaw(file, folder, true); },
+      uploadRaw: function (file, folder, compress) {
+        return (compress ? compressImage(file) : Promise.resolve(file)).then(function (f) {
           var ext = (f.name.match(/\.(\w+)$/) || [, "bin"])[1].toLowerCase();
           var path = (folder || "uploads") + "/" + Date.now() + "-" + slugify(f.name.replace(/\.\w+$/, "")).slice(0, 40) + "." + ext;
           return c.storage.from("media").upload(path, f, { cacheControl: "31536000", upsert: false, contentType: f.type })
@@ -198,7 +200,18 @@
         });
         return delay(row);
       },
+      rpc: function (fn, args) {
+        if (fn === "admin_apply_paid_order") {
+          var o = T.orders.filter(function (x) { return x.id === args.p_order_id; })[0];
+          if (o && !o.stock_applied) {
+            (o.items || []).forEach(function (it) { var v = T.product_variants.filter(function (x) { return x.id === it.variant_id; })[0]; if (v) v.stock = Math.max(0, v.stock - it.qty); });
+            o.stock_applied = true; o.status = "paid"; o.paid_at = new Date().toISOString();
+          }
+        }
+        return delay(true);
+      },
       upload: function (file) { return delay(URL.createObjectURL(file)); },
+      uploadRaw: function (file) { return delay(URL.createObjectURL(file)); },
       auth: {
         session: function () { return Promise.resolve({ user: { email: "demo@elessar" } }); },
         signIn: function () { return Promise.resolve({ user: { email: "demo@elessar" } }); },
@@ -391,6 +404,11 @@
         inner = '<span class="label">' + esc(f.label) + '</span><div class="rows" data-rows></div><div class="btn-row"><button type="button" class="btn btn--sm" data-addrow>+ Agregar opción de envío</button></div>';
         help = "<small>Usá el ID <code>pickup</code> para «retiro» (no pide dirección).</small>";
         break;
+      case "downloads":
+        inner = '<span class="label">' + esc(f.label) + '</span><div class="rows" data-dl></div>' +
+          '<div class="btn-row"><button type="button" class="btn btn--sm" data-adddl>+ Agregar descarga</button></div><input type="file" hidden data-dlfile>';
+        help = help || "<small>Cada fila es un botón de descarga. Podés subir PDF, imágenes o ZIP, o pegar un link (Drive, Dropbox…). Usá ↑ ↓ para ordenar.</small>";
+        break;
       case "slug": inner = lab + '<input class="input" id="' + id + '" value="' + esc(val || "") + '" pattern="[a-z0-9-]+">'; break;
       default: inner = lab + '<input class="input" id="' + id + '" value="' + esc(val == null ? "" : val) + '"' + req + ph + (f.max ? ' maxlength="' + f.max + '"' : "") + ">";
     }
@@ -482,6 +500,49 @@
       };
       renderRows();
     }
+    if (t === "downloads") {
+      wrap._value = clone(val || []);
+      var box = $("[data-dl]", wrap), fileDl = $("[data-dlfile]", wrap), target = -1;
+      var renderDl = function () {
+        box.innerHTML = wrap._value.map(function (d, i) {
+          var isImg = /\.(webp|jpe?g|png|gif|avif)(\?|$)/i.test(d.url || "");
+          return '<div class="row-edit row-edit--dl">' +
+            '<div class="img-field__preview" style="width:54px;height:54px;font-size:.7rem' + (isImg ? ";background-image:url('" + esc(resolveUrl(d.url)).replace(/'/g, "%27") + "')" : "") + '">' + (isImg ? "" : esc(((d.url || "").split("?")[0].match(/\.(\w{2,5})$/) || [, "—"])[1].toUpperCase())) + "</div>" +
+            '<label>Nombre del botón<input class="input" data-i="' + i + '" data-f="label" value="' + esc(d.label || "") + '" placeholder="Ej.: Foto promocional"></label>' +
+            '<label>Archivo o link<input class="input" data-i="' + i + '" data-f="url" value="' + esc(d.url || "") + '" placeholder="https://… o subí un archivo"></label>' +
+            '<div class="btn-row" style="align-self:end;flex-wrap:nowrap">' +
+            '<button type="button" class="btn btn--sm" data-up="' + i + '">Subir</button>' +
+            '<button type="button" class="btn btn--sm btn--ghost" data-mv="' + i + '|-1" title="Subir en la lista">↑</button>' +
+            '<button type="button" class="btn btn--sm btn--ghost" data-mv="' + i + '|1" title="Bajar en la lista">↓</button>' +
+            '<button type="button" class="btn btn--sm btn--danger" data-del="' + i + '" title="Quitar">×</button></div></div>';
+        }).join("") || '<p class="small muted">No hay descargas: el recuadro de prensa muestra solo el texto (o se oculta si también está vacío).</p>';
+      };
+      box.oninput = function (e) {
+        var inp = e.target.closest("[data-f]"); if (!inp) return;
+        wrap._value[+inp.dataset.i][inp.dataset.f] = inp.value;
+      };
+      box.onchange = function (e) { if (e.target.closest('[data-f="url"]')) renderDl(); };
+      box.onclick = function (e) {
+        var b = e.target.closest("button"); if (!b) return;
+        if (b.dataset.del != null) { wrap._value.splice(+b.dataset.del, 1); renderDl(); }
+        if (b.dataset.mv) { var p = b.dataset.mv.split("|"), i = +p[0], j = i + (+p[1]); if (j >= 0 && j < wrap._value.length) { var x = wrap._value[i]; wrap._value[i] = wrap._value[j]; wrap._value[j] = x; renderDl(); } }
+        if (b.dataset.up != null) { target = +b.dataset.up; fileDl.click(); }
+      };
+      fileDl.onchange = function () {
+        var file = fileDl.files[0]; fileDl.value = "";
+        if (!file || target < 0) return;
+        var row = wrap._value[target];
+        toast("Subiendo " + file.name + "…");
+        // Las fotos de prensa se suben en calidad original (sin comprimir)
+        DB.uploadRaw(file, "press").then(function (u) {
+          row.url = u;
+          if (!row.label) row.label = file.name.replace(/\.\w+$/, "");
+          renderDl(); toast("Archivo subido");
+        }).catch(function (er) { toast("No se pudo subir: " + errMsg(er), true); });
+      };
+      $("[data-adddl]", wrap).onclick = function () { wrap._value.push({ label: "", url: "" }); renderDl(); };
+      renderDl();
+    }
     if (t === "slug" && f.from) {
       var src = $("#f_" + f.from), slugIn = $("input", wrap), touched = !!slugIn.value;
       slugIn.addEventListener("input", function () { touched = true; });
@@ -507,6 +568,7 @@
       case "timeline": return el.value.split("\n").map(function (l) { var i = l.indexOf("|"); return i < 0 ? null : { year: l.slice(0, i).trim(), text: l.slice(i + 1).trim() }; }).filter(Boolean);
       case "image": case "file": return $("[data-url]", wrap).value.trim() || null;
       case "images": case "variants": case "shipping": return wrap._value;
+      case "downloads": return wrap._value.filter(function (d) { return d.url && d.url.trim(); }).map(function (d) { return { label: (d.label || "Descargar").trim(), url: d.url.trim() }; });
       case "slug": return slugify(el.value);
       default: return el.value.trim() === "" ? (f.required ? "" : null) : el.value.trim();
     }
@@ -655,48 +717,121 @@
       { k: "email", label: "Email general", type: "text" }, { k: "booking_email", label: "Email de booking", type: "text" },
       { k: "press_email", label: "Email de prensa", type: "text" }, { k: "location", label: "Ubicación", type: "text" }
     ] },
-    { key: "press", title: "Prensa (EPK)", fields: [
-      { k: "epk_url", label: "Kit de prensa (PDF)", type: "file", accept: "application/pdf", folder: "press" },
-      { k: "photos_zip_url", label: "Pack de fotos (ZIP, opcional)", type: "file", accept: ".zip,application/zip", folder: "press" }
-    ] },
     { key: "shop", title: "Tienda · envíos", fields: [
       { k: "shipping_options", label: "Opciones de envío", type: "shipping" },
       { k: "note", label: "Nota para clientes", type: "textarea" }
     ] }
   ];
 
-  function viewSettings() {
+  /* ---------- Prensa (recuadro "Kit de prensa" de Contacto) ---------- */
+  var PRESS_SECTIONS = [
+    { key: "press", title: "Recuadro «Kit de prensa»", save: "Guardar prensa",
+      help: "Esto es lo que aparece a la derecha del formulario en la página <b>Contacto</b>. Si dejás la lista vacía y el texto vacío, el recuadro se oculta.",
+      fields: [
+        { k: "title", label: "Título", type: "text", placeholder: "Kit de prensa" },
+        { k: "text", label: "Texto", type: "textarea" },
+        { k: "downloads", label: "Descargas", type: "downloads" }
+      ] }
+  ];
+
+  /* ---------- Pagos (todos guardan en settings.payments) ---------- */
+  var SECRET_NOTE = function (names) { return "Requiere la función <code>create-checkout</code> publicada y los secretos " + names + " en Supabase → Edge Functions → Secrets (ver docs/DEPLOY.md). Las claves nunca se cargan acá."; };
+  var PAY_SECTIONS = [
+    { key: "payments", title: "MercadoPago", save: "Guardar MercadoPago", help: SECRET_NOTE("<code>MP_ACCESS_TOKEN</code> y <code>SITE_URL</code>"), fields: [
+      { k: "mercadopago_enabled", label: "Mostrar MercadoPago en el checkout", type: "bool" },
+      { k: "mercadopago_label", label: "Nombre visible", type: "text" },
+      { k: "mercadopago_description", label: "Descripción", type: "text" }
+    ] },
+    { key: "payments", title: "PayPal", save: "Guardar PayPal", help: "PayPal no opera en pesos: se cobra en <b>dólares</b> usando la cotización de abajo. " + SECRET_NOTE("<code>PAYPAL_CLIENT_ID</code>, <code>PAYPAL_SECRET</code> y <code>PAYPAL_ENV</code>"), fields: [
+      { k: "paypal_enabled", label: "Mostrar PayPal en el checkout", type: "bool" },
+      { k: "paypal_label", label: "Nombre visible", type: "text" },
+      { k: "paypal_description", label: "Descripción", type: "text" },
+      { k: "paypal_usd_rate", label: "Cotización: ¿cuántos pesos vale 1 USD?", type: "money", help: "Ej.: 1250. Un pedido de $25.000 se cobraría USD 20. Actualizalo cuando cambie el dólar." }
+    ] },
+    { key: "payments", title: "Stripe (tarjetas internacionales)", save: "Guardar Stripe", help: "Solo si la banda tiene cuenta de Stripe (no se abre desde Argentina). " + SECRET_NOTE("<code>STRIPE_SECRET_KEY</code> y <code>STRIPE_WEBHOOK_SECRET</code>"), fields: [
+      { k: "stripe_enabled", label: "Mostrar Stripe en el checkout", type: "bool" },
+      { k: "stripe_label", label: "Nombre visible", type: "text" },
+      { k: "stripe_description", label: "Descripción", type: "text" }
+    ] },
+    { key: "payments", title: "Pedido por WhatsApp", save: "Guardar WhatsApp", wa: true,
+      help: "El cliente no paga en la web: se le abre WhatsApp con el pedido ya escrito y te llega el mensaje a vos. El pedido también queda registrado en <b>Pedidos</b> (si la función está publicada). <b>Si desactivás todos los demás métodos, todas las compras van por WhatsApp.</b>",
+      fields: [
+        { k: "whatsapp_enabled", label: "Ofrecer compra por WhatsApp", type: "bool" },
+        { k: "whatsapp_number", label: "Número de WhatsApp que recibe los pedidos", type: "text", placeholder: "5492991234567", help: "Formato internacional, solo números: 54 + 9 + código de área sin 0 + número sin 15. Ej.: <code>5492991234567</code>" },
+        { k: "whatsapp_intro", label: "Saludo del mensaje", type: "textarea", help: "Debajo se agregan solos los productos con talle y cantidad, por ejemplo:<br><code>Remera Dark Desires Talle L</code><br><code>CD Kósmos (2 ejemplares)</code>" },
+        { k: "whatsapp_include_total", label: "Incluir el total en el mensaje", type: "bool" },
+        { k: "whatsapp_cart_button", label: "Mostrar botón «Pedir por WhatsApp» en el carrito (sin pasar por el checkout)", type: "bool" },
+        { k: "whatsapp_label", label: "Nombre visible en el checkout", type: "text" },
+        { k: "whatsapp_description", label: "Descripción en el checkout", type: "text" }
+      ] }
+  ];
+
+  /** Editor genérico de ajustes: cada sección es una tarjeta con su botón Guardar.
+      Varias tarjetas pueden escribir en la misma clave (ej. "payments"). */
+  function viewSettingsPage(sections, title, subtitle, intro) {
     loading();
     Promise.all([DB.list("settings"), DB.list("releases", { order: "sort" })]).then(function (res) {
       var map = {}; res[0].forEach(function (r) { map[r.key] = r.value || {}; });
       var opts = {}; res[1].forEach(function (r) { opts[r.slug] = r.title + " (" + (r.year || "") + ")"; });
-      SETTINGS.filter(function (s) { return s.key === "media"; })[0].fields[3].options = opts;
-      main.innerHTML = setHeader("Contenido", "Textos, imágenes de portada, bio, redes y envíos.") +
-        SETTINGS.map(function (s) {
-          return '<section class="card" data-skey="' + s.key + '"><h2>' + esc(s.title) + '</h2><div data-sform></div>' +
-            '<div class="btn-row" style="justify-content:flex-end"><button class="btn btn--primary" data-ssave>Guardar ' + esc(s.title.split(" ")[0].toLowerCase()) + "</button></div></section>";
+      var media = SETTINGS.filter(function (s) { return s.key === "media"; })[0];
+      if (media) media.fields[3].options = opts;
+      main.innerHTML = setHeader(title, subtitle) + (intro || "") +
+        sections.map(function (s, i) {
+          return '<section class="card" data-sidx="' + i + '"><h2>' + esc(s.title) + "</h2>" + (s.help ? '<div class="help">' + s.help + "</div>" : "") + "<div data-sform></div>" +
+            '<div class="btn-row" style="justify-content:flex-end">' +
+            (s.wa ? '<button class="btn" data-watest>Probar mensaje</button>' : "") +
+            '<button class="btn btn--primary" data-ssave>' + esc(s.save || ("Guardar " + s.title.split(" ")[0].toLowerCase())) + "</button></div></section>";
         }).join("");
-      SETTINGS.forEach(function (s) {
-        var card = $('[data-skey="' + s.key + '"]', main), form = $("[data-sform]", card);
+      sections.forEach(function (s, i) {
+        var card = $('[data-sidx="' + i + '"]', main), form = $("[data-sform]", card);
         var base = Object.assign({}, (DEF.settings || {})[s.key] || {}, map[s.key] || {});
         renderForm(form, s.fields, base);
         $("[data-ssave]", card).onclick = function () {
           var btn = this, data;
           try { data = collectForm(form, s.fields); } catch (er) { toast(er.message, true); return; }
+          if (s.wa && data.whatsapp_enabled && !String(data.whatsapp_number || "").replace(/\D/g, "")) { toast("Cargá el número de WhatsApp para activar esta opción.", true); return; }
+          if ("whatsapp_number" in data && data.whatsapp_number) data.whatsapp_number = String(data.whatsapp_number).replace(/\D/g, "");
           btn.disabled = true;
-          DB.upsert("settings", { key: s.key, value: Object.assign({}, map[s.key] || {}, data) }, "key")
-            .then(function () { map[s.key] = Object.assign({}, map[s.key] || {}, data); toast("Guardado: " + s.title); })
+          var value = Object.assign({}, (DEF.settings || {})[s.key] || {}, map[s.key] || {}, data);
+          DB.upsert("settings", { key: s.key, value: value }, "key")
+            .then(function () { map[s.key] = value; toast("Guardado: " + s.title); if (s.key === "payments") paymentsSummary(map.payments); })
             .catch(function (er) { toast(errMsg(er), true); })
             .then(function () { btn.disabled = false; });
         };
+        var test = $("[data-watest]", card);
+        if (test) test.onclick = function () {
+          var d; try { d = collectForm(form, s.fields); } catch (er) { toast(er.message, true); return; }
+          var num = String(d.whatsapp_number || "").replace(/\D/g, "");
+          if (!num) { toast("Primero cargá el número.", true); return; }
+          var msg = (d.whatsapp_intro || "") + "\nRemera Dark Desires Talle L\nCD Kósmos (2 ejemplares)" + (d.whatsapp_include_total ? "\n\nTotal: $ 55.000 + envío" : "");
+          window.open("https://wa.me/" + num + "?text=" + encodeURIComponent(msg), "_blank", "noopener");
+        };
       });
-    }).catch(function (e) { main.innerHTML = setHeader("Contenido") + '<p class="err">' + esc(errMsg(e)) + "</p>"; });
+      if (sections === PAY_SECTIONS) paymentsSummary(map.payments);
+    }).catch(function (e) { main.innerHTML = setHeader(title) + '<p class="err">' + esc(errMsg(e)) + "</p>"; });
   }
+
+  /** Resumen arriba de Pagos: qué ve hoy el cliente en el checkout */
+  function paymentsSummary(p) {
+    var box = $("#pay-summary"); if (!box) return;
+    p = Object.assign({}, (DEF.settings || {}).payments || {}, p || {});
+    var names = { mercadopago: "MercadoPago", paypal: "PayPal", stripe: "Stripe", whatsapp: "WhatsApp" };
+    var on = Object.keys(names).filter(function (k) { return p[k + "_enabled"] && (k !== "whatsapp" || p.whatsapp_number); });
+    box.innerHTML = on.length
+      ? "Hoy el checkout ofrece: " + on.map(function (k) { return '<span class="pill pill--green">' + names[k] + "</span>"; }).join(" ") +
+        (on.length === 1 && on[0] === "whatsapp" ? ' <span class="small muted">— todas las compras se coordinan por WhatsApp.</span>' : "")
+      : '<span class="pill pill--red">Ningún método activo</span> <span class="small muted">— el checkout no permite comprar.</span>';
+  }
+
+  function viewSettings() { viewSettingsPage(SETTINGS, "Contenido", "Textos, imágenes de portada, bio, redes y envíos."); }
+  function viewPress() { viewSettingsPage(PRESS_SECTIONS, "Prensa", "El recuadro «Kit de prensa» de la página Contacto: descargas para medios y productores."); }
+  function viewPayments() { viewSettingsPage(PAY_SECTIONS, "Pagos", "Elegí qué métodos de pago ve el cliente en el checkout.", '<div class="card" style="margin-bottom:16px" id="pay-summary"></div>'); }
 
   /* ---------- Pedidos ---------- */
   var ORDER_STATUS = { pending: "Pendiente de pago", paid: "Pagado · preparar", shipped: "Enviado", delivered: "Entregado", cancelled: "Cancelado", refunded: "Reintegrado" };
   var ORDER_PILL = { pending: "", paid: "pill--gold", shipped: "pill--teal", delivered: "pill--green", cancelled: "pill--red", refunded: "pill--red" };
   var orderFilter = "all";
+  var PROVIDER_NAMES = { mercadopago: "MercadoPago", paypal: "PayPal", stripe: "Stripe", whatsapp: "WhatsApp" };
 
   function viewOrders() {
     loading();
@@ -713,7 +848,7 @@
           var n = (o.items || []).reduce(function (s, i) { return s + i.qty; }, 0);
           return '<tr data-id="' + esc(o.id) + '"><td>' + fmtDate(o.created_at, true) + "</td><td><code>" + esc(String(o.id).slice(0, 8).toUpperCase()) + "</code></td>" +
             "<td>" + esc((o.customer || {}).name) + '<br><span class="small muted">' + esc((o.customer || {}).email) + "</span></td>" +
-            "<td>" + n + " u. · " + esc((o.shipping || {}).id === "pickup" ? "Retiro" : "Envío") + "</td><td><b>" + money(o.total) + "</b></td>" +
+            "<td>" + n + " u. · " + esc((o.shipping || {}).id === "pickup" ? "Retiro" : "Envío") + '<br><span class="small muted">' + esc(PROVIDER_NAMES[o.provider] || o.provider || "—") + "</span></td><td><b>" + money(o.total) + "</b></td>" +
             '<td><select class="select" data-status style="min-height:34px;padding:4px 8px">' + Object.keys(ORDER_STATUS).map(function (k) { return '<option value="' + k + '"' + (o.status === k ? " selected" : "") + ">" + ORDER_STATUS[k] + "</option>"; }).join("") + "</select></td>" +
             '<td class="actions"><button class="btn btn--sm" data-view>Ver</button></td></tr>';
         }).join("") : '<tr><td colspan="7" class="empty">No hay pedidos en esta vista.</td></tr>') + "</tbody></table></div>";
@@ -722,7 +857,20 @@
       var tbody = main.querySelector("tbody");
       tbody.addEventListener("change", function (e) {
         var s = e.target.closest("[data-status]"); if (!s) return;
-        DB.update("orders", s.closest("tr").dataset.id, { status: s.value }).then(function () { toast("Estado actualizado"); refreshCounts(); }).catch(function (er) { toast(errMsg(er), true); });
+        var id = s.closest("tr").dataset.id;
+        var o = rows.filter(function (x) { return String(x.id) === id; })[0];
+        // Pedido manual (WhatsApp…) marcado como pagado → descontar stock una sola vez
+        var discount = s.value === "paid" && o && !o.stock_applied;
+        var done = discount
+          ? DB.rpc("admin_apply_paid_order", { p_order_id: id }).then(function () { o.stock_applied = true; o.status = "paid"; toast("Marcado como pagado · stock descontado"); },
+              function (er) {
+                if (/admin_apply_paid_order|function|schema cache/i.test(errMsg(er))) {
+                  return DB.update("orders", id, { status: "paid" }).then(function () { toast("Estado actualizado. Para que también descuente stock, corré supabase/migrations/2026-10-22-pagos-y-whatsapp.sql en Supabase.", true); });
+                }
+                throw er;
+              })
+          : DB.update("orders", id, { status: s.value }).then(function () { if (o) o.status = s.value; toast("Estado actualizado"); });
+        done.then(refreshCounts).catch(function (er) { toast(errMsg(er), true); });
       });
       tbody.addEventListener("click", function (e) {
         if (!e.target.closest("[data-view]")) return;
@@ -823,6 +971,8 @@
     dashboard: { label: "Resumen", icon: "◈", view: viewDashboard },
     announcements: { label: "Avisos", icon: "✦", view: function () { viewCrud("announcements"); } },
     content: { label: "Contenido", icon: "✎", view: viewSettings },
+    payments: { label: "Pagos", icon: "$", view: viewPayments },
+    press: { label: "Prensa", icon: "❏", view: viewPress },
     shows: { label: "Fechas", icon: "◷", view: function () { viewCrud("shows"); } },
     products: { label: "Tienda", icon: "◇", view: function () { viewCrud("products"); } },
     orders: { label: "Pedidos", icon: "▤", view: viewOrders, badge: "orders" },
